@@ -38,13 +38,16 @@ def get_book_info(book):
 def get_movie_info(movie):
     movie_name = movie.find_next('a').text
     movie_url = 'http://www.imdb.com' + movie.find_next('a').get('href')
-    info = movie.find('div', class_='rating').get('title')
+    info = movie.find_next('div', class_='rating').get('title')
     avg_rating = re.findall('rated this ([0-9.]*)', info)[0]
     avg_rating = float(avg_rating)
     num_ratings = re.findall('([0-9,]*) votes', info)[0]
     num_ratings = int(num_ratings.replace(',', ''))
     published = movie.find_next('span', class_='year_type').text
-    published = int(re.findall('\(([0-9]*)', published)[0])
+    try:
+        published = int(re.findall('\(([0-9]*)', published)[0])
+    except ValueError:
+        published = -1
 
     movie_hash = {
         'movie_name': movie_name,
@@ -87,16 +90,16 @@ def defaults(books=True, movies=True):
         books_hash = get_goodreads_data(base_url=book_movies_url, pages=41)
         books_output_filename = 'goodreads_ratings.json'
 
-        with open(books_output_filename, 'wb') as outfile:
+        with open(books_output_filename, 'w') as outfile:
             json.dump(books_hash, outfile)
 
     if(movies):
-        movies_base_url = 'http://www.imdb.com/list/ls000099866/'
-        movies_hash = get_imdb_data(base_url=movies_base_url, pages=2)
+        movies_base_url = 'http://www.imdb.com/list/ls050071819/'
+        movies_hash = get_imdb_data(base_url=movies_base_url, pages=3)
         movies_output_filename = 'movies_ratings.json'
 
-        with open(movies_output_filename, 'wb') as outfile:
+        with open(movies_output_filename, 'w') as outfile:
             json.dump(movies_hash, outfile)
 
 if __name__ == "__main__":
-    defaults(False, True)
+    defaults(True, True)
